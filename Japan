@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>留学FAQ - よくある質問</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f7fa;
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .faq-bot {
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            padding: 25px;
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .chat-container {
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            background-color: #fafafa;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            border-radius: 18px;
+            max-width: 80%;
+            word-wrap: break-word;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .user-message {
+            background-color: #e3f2fd;
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+            color: #0d47a1;
+        }
+
+        .bot-message {
+            background-color: #f1f1f1;
+            margin-right: auto;
+            border-bottom-left-radius: 5px;
+        }
+
+        .input-container {
+            display: flex;
+            margin-top: 15px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        input[type="text"]:focus {
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 2px rgba(76,175,80,0.2);
+        }
+
+        button {
+            padding: 12px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-left: 10px;
+            font-size: 16px;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 0.9em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>留学に関するよくある質問</h1>
+    
+    <div class="faq-bot">
+        <div class="chat-container" id="chatContainer">
+            <div class="message bot-message">こんにちは！留学に関するご質問があればお気軽にどうぞ。</div>
+        </div>
+        <div class="input-container">
+            <input type="text" id="userInput" placeholder="質問を入力してください...">
+            <button onclick="sendMessage()">送信</button>
+        </div>
+    </div>
+
+    <div class="footer">
+        &copy; 2025 留学サポートFAQシステム
+    </div>
+
+    <script>
+        // FAQデータの取得
+        let faqData = [];
+        
+        // ページ読み込み時にローカルストレージからFAQデータを読み込む
+        document.addEventListener('DOMContentLoaded', function() {
+            const storedData = localStorage.getItem('faqBotData');
+            if (storedData) {
+                try {
+                    faqData = JSON.parse(storedData);
+                } catch (e) {
+                    console.error('保存されたデータの解析エラー:', e);
+                    // 初期データの設定
+                    setDefaultData();
+                }
+            } else {
+                // 初期データの設定
+                setDefaultData();
+            }
+        });
+
+        // 初期データ設定
+        function setDefaultData() {
+            faqData = [
+                {
+                    question: "留学費用について教えてください",
+                    keywords: ["費用", "料金", "お金", "予算", "値段", "コスト", "いくら"],
+                    answer: "留学費用は国や期間によって大きく異なります。短期（1ヶ月）の語学留学で約50〜80万円、半年〜1年の長期留学で約150〜300万円が目安です。詳しくは個別にご相談ください。"
+                },
+                {
+                    question: "どのような国に留学できますか",
+                    keywords: ["国", "留学先", "どこ", "地域", "国々", "海外", "場所"],
+                    answer: "当社では主に英語圏（アメリカ、カナダ、イギリス、オーストラリア、ニュージーランド）、ヨーロッパ諸国（フランス、ドイツ、スペインなど）、アジア（シンガポール、マレーシアなど）への留学をサポートしています。"
+                },
+                {
+                    question: "留学するのにビザは必要ですか",
+                    keywords: ["ビザ", "査証", "VISA", "パスポート", "必要", "手続き", "申請"],
+                    answer: "基本的に90日以上の留学にはビザが必要です。国や留学目的によって必要なビザの種類が異なります。当社ではビザ申請のサポートも行っておりますので、ご安心ください。"
+                }
+            ];
+            localStorage.setItem('faqBotData', JSON.stringify(faqData));
+        }
+
+        // メッセージ送信処理
+        function sendMessage() {
+            const userInput = document.getElementById('userInput');
+            const chatContainer = document.getElementById('chatContainer');
+            const userQuery = userInput.value.trim();
+            
+            if (userQuery === '') return;
+            
+            // ユーザーのメッセージを表示
+            const userMessageDiv = document.createElement('div');
+            userMessageDiv.className = 'message user-message';
+            userMessageDiv.textContent = userQuery;
+            chatContainer.appendChild(userMessageDiv);
+            
+            // 回答を検索
+            setTimeout(() => {
+                const botMessageDiv = document.createElement('div');
+                botMessageDiv.className = 'message bot-message';
+                
+                // FAQ内で質問を検索
+                const matchedFaq = findMatchingFaq(userQuery);
+                
+                if (matchedFaq) {
+                    botMessageDiv.textContent = matchedFaq.answer;
+                } else {
+                    botMessageDiv.textContent = "申し訳ありませんが、その質問についての情報はありません。別の質問をお試しいただくか、より具体的にお問い合わせください。";
+                }
+                
+                chatContainer.appendChild(botMessageDiv);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }, 500);
+            
+            // 入力フィールドをクリア
+            userInput.value = '';
+        }
+
+        // 強化されたFAQ検索システム
+        function findMatchingFaq(query) {
+            if (!query) return null;
+            
+            // 検索クエリを前処理
+            query = query.toLowerCase();
+            
+            // スコアを用いた検索結果のランキング
+            const results = [];
+            
+            for (const faq of faqData) {
+                // 完全一致の場合は即座に返す
+                if (faq.question.toLowerCase() === query) {
+                    return faq;
+                }
+                
+                // スコア計算のための変数
+                let score = 0;
+                const questionLower = faq.question.toLowerCase();
+                
+                // 1. キーワードマッチング
+                if (faq.keywords && Array.isArray(faq.keywords)) {
+                    for (const keyword of faq.keywords) {
+                        if (query.includes(keyword.toLowerCase())) {
+                            score += 10; // キーワードが含まれる場合は高いスコア
+                        }
+                    }
+                }
+                
+                // 2. 質問文に含まれる単語のマッチング
+                const queryWords = query.split(/\s+/);
+                const questionWords = questionLower.split(/\s+/);
+                
+                for (const word of queryWords) {
+                    if (word.length < 2) continue; // 短すぎる単語は無視
+                    
+                    if (questionLower.includes(word)) {
+                        score += 5; // 質問に単語が含まれる場合
+                    }
+                    
+                    // 部分一致（文字列の一部が含まれる）
+                    for (const qword of questionWords) {
+                        if (qword.includes(word) || word.includes(qword)) {
+                            score += 3;
+                        }
+                    }
+                }
+                
+                // 3. 質問が検索クエリを含む場合
+                if (questionLower.includes(query)) {
+                    score += 15;
+                }
+                
+                // 4. 検索クエリが質問を含む場合
+                if (query.includes(questionLower)) {
+                    score += 8;
+                }
+                
+                // スコアが一定以上の場合のみ結果に追加
+                if (score > 5) {
+                    results.push({
+                        faq: faq,
+                        score: score
+                    });
+                }
+            }
+            
+            // スコアでソートして最適な回答を返す
+            if (results.length > 0) {
+                // スコアの降順でソート
+                results.sort((a, b) => b.score - a.score);
+                
+                // 最高スコアのFAQを返す
+                return results[0].faq;
+            }
+            
+            return null; // 一致するものがない
+        }
+
+        // Enterキーで送信
+        document.getElementById('userInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>

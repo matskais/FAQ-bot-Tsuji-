@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>留学FAQ管理システム</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .admin-panel {
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            padding: 25px;
+            background-color: white;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .faq-item {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: box-shadow 0.3s;
+        }
+
+        .faq-item:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .faq-item input, .faq-item textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .faq-item input:focus, .faq-item textarea:focus {
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 2px rgba(76,175,80,0.2);
+        }
+
+        .keywords-container {
+            margin-bottom: 12px;
+        }
+
+        .keyword-tag {
+            display: inline-block;
+            background-color: #e1f5fe;
+            color: #0277bd;
+            padding: 5px 10px;
+            margin: 3px;
+            border-radius: 16px;
+            font-size: 14px;
+        }
+
+        .keyword-tag .remove-keyword {
+            margin-left: 5px;
+            cursor: pointer;
+            color: #01579b;
+        }
+
+        .keyword-input {
+            display: flex;
+            margin-top: 8px;
+        }
+
+        .keyword-input input {
+            flex: 1;
+            margin-right: 10px;
+            margin-bottom: 0;
+        }
+
+        .keyword-input button {
+            padding: 8px 12px;
+            font-size: 14px;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        button {
+            padding: 10px 18px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        .delete-btn {
+            background-color: #f44336;
+        }
+
+        .delete-btn:hover {
+            background-color: #d32f2f;
+        }
+
+        .add-keyword-btn {
+            background-color: #2196F3;
+        }
+
+        .add-keyword-btn:hover {
+            background-color: #0b7dda;
+        }
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            resize: vertical;
+            outline: none;
+        }
+
+        textarea:focus {
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 2px rgba(76,175,80,0.2);
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 25px;
+        }
+
+        .tab {
+            padding: 12px 25px;
+            background-color: #e9ecef;
+            cursor: pointer;
+            border-radius: 8px 8px 0 0;
+            margin-right: 5px;
+            transition: background-color 0.2s;
+        }
+
+        .tab.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .tab:hover:not(.active) {
+            background-color: #dee2e6;
+        }
+
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .save-load-container {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+        }
+        
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        
+        .preview-link {
+            background-color: #2196F3;
+        }
+        
+        .preview-link:hover {
+            background-color: #0b7dda;
+        }
+        
+        .password-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .password-container {
+            background-color: white;
+            padding: 35px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .password-container h2 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        
+        .password-container input {
+            width: 100%;
+            margin: 15px 0;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            outline: none;
+        }
+        
+        .password-container input:focus {
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 2px rgba(76,175,80,0.2);
+        }
+        
+        .password-container button {
+            width: 100%;
+            margin-top: 20px;
+            padding: 12px;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+
+        .help-text {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <!-- パスワード入力オーバーレイ -->
+    <div id="passwordOverlay" class="password-overlay">
+        <div class="password-container">
+            <h2>管理者認証</h2>
+            <p>管理画面にアクセスするにはパスワードを入力してください</p>
+            <input type="password" id="passwordInput" placeholder="パスワードを入力">
+            <button onclick="checkPassword()">ログイン</button>
+            <p style="font-size: 0.8em; color: #666; margin-top: 15px;">※初期パスワード: admin</p>
+        </div>
+    </div>
+
+    <div id="adminContent" style="display: none;">
+        <h1>留学FAQ管理システム</h1>
+        
+        <div class="admin-header">
+            <h2>管理パネル</h2>
+            <button class="preview-link" onclick="window.open('index.html', '_blank')">ユーザー画面を表示</button>
+        </div>
+        
+        <div class="admin-panel">
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab(this, 'editFaq')">FAQ編集</div>
+                <div class="tab" onclick="switchTab(this, 'importExport')">インポート/エクスポート</div>
+                <div class="tab" onclick="switchTab(this, 'settings')">設定</div>
+            </div>
+            
+            <div class="panel active" id="editFaq">
+                <div class="help-text">
+                    <p>💡 <strong>キーワード設定のヒント:</strong> ユーザーが使いそうな単語をキーワードに追加すると、より柔軟に質問に回答できます。例：「費用」「いくら」「値段」など</p>
+                </div>
+                <div id="faqList">
+                    <!-- FAQリストがここに生成されます -->
+                </div>
+                <button onclick="addNewFaq()">新規FAQ追加</button>
+            </div>
+            
+            <div class="panel" id="importExport">
+                <div class="save-load-container">
+                    <h3>FAQデータの保存・読み込み</h3>
+                    <button onclick="exportFAQs()">FAQをエクスポート</button>
+                    <p style="margin-top: 20px;">FAQデータをインポート:</p>
+                    <textarea id="importData" placeholder="JSONデータをここに貼り付けてください..."></textarea>
+                    <button onclick="importFAQs()">インポート</button>
+                </div>
+            </div>
+            
+            <div class="panel" id="settings">
+                <div class="save-load-container">
+                    <h3>管理パスワードの設定</h3>
+                    <p>現在のパスワード: <span id="currentPasswordMask">••••••</span></p>
+                    <input type="password" id="newPassword" placeholder="新しいパスワード">
+                    <button onclick="changePassword()">パスワードを変更</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            &copy; 2025 留学サポートFAQ管理システム
+        </div>
+    </div>
+
+    <script>
+        // 管理者パスワード (初期値: admin)
+        let adminPassword = localStorage.getItem('faqBotAdminPassword') || 'admin';
+        
+        // パスワードチェック
+        function checkPassword() {
+            const inputPassword = document.getElementById('passwordInput').value;
+            if (inputPassword === adminPassword) {
+                document.getElementById('passwordOverlay').style.display = 'none';
+                document.getElementById('adminContent').style.display = 'block';
+                loadFaqData(); // パスワード認証後にデータを読み込む
+            } else {
+                alert('パスワードが正しくありません');
+            }
+        }
+        
+        // パスワード変更
+        function changePassword() {
+            const newPassword = document.getElementById('newPassword').value.trim();
+            if (newPassword && newPassword.length >= 4) {
+                adminPassword = newPassword;
+                localStorage.setItem('faqBotAdminPassword', adminPassword);
+                alert('パスワードが変更されました');
+                document.getElementById('newPassword').value = '';
+            } else {
+                alert('パスワードは4文字以上で設定してください');
+            }
+        }
+        
+        // FAQデータ
+        let faqData = [];
+
+        // FAQデータの読み込み
+        function loadFaqData() {
+            const storedData = localStorage.getItem('faqBotData');
+            if (storedData) {
+                try {
+                    faqData = JSON.parse(storedData);
+                    
+                    // 古いデータ形式の場合は変換
+                    faqData = faqData.map(faq => {
+                        if (!faq.keywords) {
+                            // キーワードがない場合は質問から自動生成
+                            const words = faq.question.toLowerCase().split(/[\s,\.、。]/);
+                            faq.keywords = words.filter(word => word.length > 1);
+                        }
+                        return faq;
+                    });
+                    
+                } catch (e) {
+                    console.error('保存されたデータの解析エラー:', e);
+                    setDefaultData();
+                }
+            } else {
+                setDefaultData();
+            }
+            renderFaqList();
+        }
+        
+        // デフォルトデータの設定
+        function setDefaultData() {
+            faqData = [
+                {
+                    question: "留学費用について教えてください",
+                    keywords: ["費用", "料金", "お金", "予算", "値段", "コスト", "いくら"],
+                    answer: "留学費用は国や期間によって大きく異なります。短期（1ヶ月）の語学留学で約50〜80万円、半年〜1年の長期留学で約150〜300万円が目安です。詳しくは個別にご相談ください。"
+                },
+                {
+                    question: "どのような国に留学できますか",
+                    keywords: ["国", "留学先", "どこ", "地域", "国々", "海外", "場所"],
+                    answer: "当社では主に英語圏（アメリカ、カナダ、イギリス、オーストラリア、ニュージーランド）、ヨーロッパ諸国（フランス、ドイツ、スペインなど）、アジア（シンガポール、マレーシアなど）への留学をサポートしています。"
+                },
+                {
+                    question: "留学するのにビザは必要ですか",
+                    keywords: ["ビザ", "査証", "VISA", "パスポート", "必要", "手続き", "申請"],
+                    answer: "基本的に90日以上の留学にはビザが必要です。国や留学目的によって必要なビザの種類が異なります。当社ではビザ申請のサポートも行っておりますので、ご安心ください。"
+                }
+            ];
+            saveFaqs();
+        }
+
+        // FAQリストのレンダリング
+        function renderFaqList() {
+            const faqList = document.getElementById('faqList');
+            faqList.innerHTML = '';
+            
+            if (faqData.length === 0) {
+                faqList.innerHTML = '<p>FAQがありません。「新規FAQ追加」ボタンをクリックして追加してください。</p>';
+                return;
+            }
+            
+            faqData.forEach((faq, index) => {
+                const faqItem = document.createElement('div');
+                faqItem.className = 'faq-item';
+                
+                // キーワードタグを生成
+                let keywordTags = '';
+                if (faq.keywords && Array.isArray(faq.keywords)) {
+                    faq.keywords.forEach((keyword, keywordIndex) => {
+                        keywordTags += `
+                            <span class="keyword-tag">
+                                ${keyword}
+                                <span class="remove-keyword" onclick="removeKeyword(${index}, ${keywordIndex})">×</span>
+                            </span>
+                        `;
+                    });
+                }
+                
+                faqItem.innerHTML = `
+                    <input type="text" placeholder="質問" value="${faq.question || ''}" onchange="updateFaq(${index}, 'question', this.value)">
+                    <div class="keywords-container">
+                        <label>関連キーワード:</label>
+                        <div class="keyword-tags">
+                            ${keywordTags}
+                        </div>
+                        <div class="keyword-input">
+                            <input type="text" placeholder="新しいキーワードを入力" id="keywordInput-${index}">
+                            <button class="add-keyword-btn" onclick="addKeyword(${index})">追加</button>
+                        </div>
+                    </div>
+                    <textarea placeholder="回答" onchange="updateFaq(${index}, 'answer', this.value)">${faq.answer || ''}</textarea>
+                    <div class="action-buttons">
+                        <button class="delete-btn" onclick="deleteFaq(${index})">削除</button>
+                    </div>
+                `;
+                faqList.appendChild(faqItem);
+                
+                // Enterキーでキーワード追加
+                const keywordInput = document.getElementById(`keywordInput-${index}`);
+                keywordInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addKeyword(index);
+                    }
+                });
+            });
+        }
+
+        // 新規FAQの追加
+        function addNewFaq() {
+            faqData.push({
+                question: "",
+                keywords: [],
+                answer: ""
+            });
+            renderFaqList();
+            saveFaqs();
+        }
+
+        // FAQの更新
+        function updateFaq(index, field, value) {
+            faqData[index][field] = value;
+            saveFaqs();
+        }
+
+        // キーワードの追加
+        function addKeyword(faqIndex) {
+            const keywordInput = document.getElementById(`keywordInput-${faqIndex}`);
+            const keyword = keywordInput.value.trim();
+            
+            if (keyword) {
+                if (!faqData[faqIndex].keywords) {
+                    faqData[faqIndex].keywords = [];
+                }
+                
+                // 重複チェック
+                if (!faqData[faqIndex].keywords.includes(keyword)) {
+                    faqData[faqIndex].keywords.push(
